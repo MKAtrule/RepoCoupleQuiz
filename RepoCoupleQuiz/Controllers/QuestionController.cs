@@ -65,5 +65,24 @@ namespace RepoCoupleQuiz.Controllers
                 return BadRequest(new { Messsage = ex.Message });
             }
         }
+        [HttpGet("DailyQuestion")]
+        public async Task<IActionResult> SendDailyQuestion()
+        {
+            try
+            {
+
+                return new JsonResult(new
+                {
+                    success = true,
+                    data = await questionService.SendDailyQuestionAsync(),
+                    Message = "Question Listed Success"
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Messsage = ex.Message });
+            }
+        }
+
     }
 }

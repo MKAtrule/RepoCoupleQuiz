@@ -1,8 +1,12 @@
+using Hangfire;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using RepoCoupleQuiz.Config;
 using RepoCoupleQuiz.Data;
+using RepoCoupleQuiz.Services;
 using System.Security.Claims;
 using System.Text;
 
@@ -10,8 +14,15 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 ServiceConfiguration.RegisterServices(builder.Services);
-builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
 builder.Services.AddControllers();
+builder.Services.AddHangfire(config =>
+{
+    config.UseSqlServerStorage(builder.Configuration.GetConnectionString("DefaultConnection"));
+});
+builder.Services.AddHangfireServer();  
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options => options.TokenValidationParameters = new TokenValidationParameters
     {
@@ -24,22 +35,45 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         ValidAudience = builder.Configuration["JWT:Audience"],
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:Key"]))
     });
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAllOrigins",
+        builder =>
+        {
+            builder.AllowAnyOrigin()
+                   .AllowAnyHeader()
+                   .AllowAnyMethod();
+        });
+});
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+app.UseCors(x =>
+    x.AllowAnyOrigin()
+     .AllowAnyMethod()
+     .AllowAnyHeader());
 
+app.UseHttpsRedirection();
 app.UseAuthorization();
+
+app.UseHangfireDashboard();  
+app.UseHangfireServer();    
+var recurringJobs = app.Services.GetRequiredService<IRecurringJobManager>();
+recurringJobs.AddOrUpdate<QuestionService>(
+    "Send Daily Question",
+    service => service.SendDailyQuestionAsync(),
+    Cron.MinuteInterval(1));  
+
 
 app.MapControllers();
 

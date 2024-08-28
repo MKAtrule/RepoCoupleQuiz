@@ -12,11 +12,15 @@ namespace RepoCoupleQuiz.Services
         private readonly IQuestionRepository questionRepository;
         private readonly IQuestionOptionRepository questionOptionRepository;
         private readonly IMapper mapper;
-        public QuestionService(IQuestionRepository questionRepository, IQuestionOptionRepository questionOptionRepository, IMapper mapper)
+        private readonly ISentQuestionRepository sentQuestionRepository;
+
+
+        public QuestionService(IQuestionRepository questionRepository, IQuestionOptionRepository questionOptionRepository, IMapper mapper, ISentQuestionRepository sentQuestionRepository)
         {
             this.questionRepository = questionRepository;
             this.questionOptionRepository = questionOptionRepository;
             this.mapper = mapper;
+            this.sentQuestionRepository = sentQuestionRepository;
         }
         public async Task<QuestionResponseDTO> CreateAsync(QuestionRequestDTO request)
         {
@@ -44,7 +48,7 @@ namespace RepoCoupleQuiz.Services
         public async Task<QuestionResponseDTO> GetQuestionById(Guid id)
         {
             var question = await questionRepository.GetById(id);
-            var options= question.QuestionOption.Select(op =>new OptionRequestDTO { Text=op.OptionText,IsCorrect=op.IsCorrect}).ToList();
+            var options= question.QuestionOption.Select(op =>new OptionRequestDTO {OptionId=op.GlobalId ,Text=op.OptionText,IsCorrect=op.IsCorrect}).ToList();
             List<OptionRequestDTO> OptionsText= mapper.Map<List<OptionRequestDTO>>(options);
             return new QuestionResponseDTO
             {
@@ -116,28 +120,29 @@ namespace RepoCoupleQuiz.Services
             };
         }
 
-        //public async Task<QuestionResponseDTO> UpdateQuestionAsync(UpdateQuestionRequestDTO request)
-        //{
-        //    var question = await questionRepository.GetById(request.QuestionId);
-        //    if (question != null)
-        //    {
-        //        // Map the incoming request DTO to the existing question entity
-        //        mapper.Map(request, question);
+        public async Task<QuestionResponseDTO> SendDailyQuestionAsync()
+        {
+            var sentQuestionIds = await sentQuestionRepository.GetSentQuestionIdsAsync();
+            var unsentQuestions = await questionRepository.GetAll();
 
-        //        // Update the question in the repository
-        //        var newQuestion = await questionRepository.Update(question);
+            var availableQuestions = unsentQuestions
+                .Where(q => !sentQuestionIds.Contains(q.GlobalId))
+                .ToList();
 
-        //        // Get and update the related options
-        //        var options = await questionOptionRepository.GetOptionsByQuestionId(request.QuestionId);
-        //        mapper.Map(request.Options, options);
-        //        await questionOptionRepository.UpdateOptions(options);
+            if (!availableQuestions.Any())
+            {
+                throw new Exception("All questions have been snet No more questions available.");
+            }
 
-        //        return mapper.Map<QuestionResponseDTO>(newQuestion);
-        //    }
-        //    else
-        //    {
-        //        throw new Exception("Question not found");
-        //    }
-        //}
+            var random = new Random();
+            var randomIndex = random.Next(availableQuestions.Count);
+            var selectedQuestion = availableQuestions[randomIndex];
+
+            await sentQuestionRepository.MarkAsSentAsync(selectedQuestion.GlobalId);
+
+            var response = mapper.Map<QuestionResponseDTO>(selectedQuestion);
+            return response;
+        }
+
     }
 }

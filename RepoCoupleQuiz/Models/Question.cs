@@ -7,5 +7,26 @@
         public ICollection<UserAnswers> UserAnswer { get; set; }
         public ICollection<SessionHistory> SessionHistory { get; set; }
         public ICollection<Result> Result { get; set; }
+        public ICollection<SentQuestion> SentQuestion { get; set; }
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

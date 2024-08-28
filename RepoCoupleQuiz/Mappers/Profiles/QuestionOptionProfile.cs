@@ -10,6 +10,7 @@ namespace RepoCoupleQuiz.Mappers.Profiles
         {
             CreateMap<QuestionOption,OptionRequestDTO>()
                 .ForMember(src=>src.Text,opt=>opt.MapFrom(src=>src.OptionText))
+                .ForMember(src => src.OptionId, opt => opt.MapFrom(src => src.GlobalId))
                 .ReverseMap();
         }
     }

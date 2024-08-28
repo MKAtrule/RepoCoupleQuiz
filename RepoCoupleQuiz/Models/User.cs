@@ -18,5 +18,6 @@
         public ICollection<PartnerInvitation> SentInvitation { get; set; }
         public ICollection<PartnerInvitation> ReceivedInvitation { get; set; }
         public ICollection<Result> Result { get; set; }
+    //    public ICollection<SessionCode> SessionCode { get; set; }
     }
 }

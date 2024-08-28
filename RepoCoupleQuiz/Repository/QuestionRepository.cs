@@ -13,6 +13,14 @@ namespace RepoCoupleQuiz.Repository
         {
             _context = context;
         }
+
+        public async Task<List<Question>> GetAll()
+        {
+            return await _context.Question
+                                 .Include(qo=>qo.QuestionOption)
+                                 .ToListAsync();
+        }
+
         public async Task<Question> GetById(Guid id)
         {
             return await _context.Question

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using RepoCoupleQuiz.Data;
 
@@ -11,9 +12,11 @@ using RepoCoupleQuiz.Data;
 namespace RepoCoupleQuiz.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240828090900_add sentquestiontbl")]
+    partial class addsentquestiontbl
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -49,7 +52,7 @@ namespace RepoCoupleQuiz.Migrations
                     b.Property<bool>("IsCodeUsed")
                         .HasColumnType("bit");
 
-                    b.Property<Guid?>("RecieverUserId")
+                    b.Property<Guid>("RecieverUserId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("SenderUserId")
@@ -205,7 +208,7 @@ namespace RepoCoupleQuiz.Migrations
                     b.HasData(
                         new
                         {
-                            GlobalId = new Guid("07474320-84d3-4a11-93c6-451d9eda4917"),
+                            GlobalId = new Guid("becc6319-ebe3-483e-a3f0-7d23c1b90655"),
                             Active = false,
                             CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             DeletedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
@@ -214,7 +217,7 @@ namespace RepoCoupleQuiz.Migrations
                         },
                         new
                         {
-                            GlobalId = new Guid("27de20da-4899-4aa4-90ae-9eaee65f798c"),
+                            GlobalId = new Guid("9108c8a5-7e49-4edc-bce2-97b5c2d7a0be"),
                             Active = false,
                             CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             DeletedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
@@ -355,10 +358,10 @@ namespace RepoCoupleQuiz.Migrations
                     b.HasData(
                         new
                         {
-                            GlobalId = new Guid("d33fdcd7-dc46-494e-9cb2-18e9691a7761"),
+                            GlobalId = new Guid("bb17a0e0-e132-463f-b169-7caff02b4f5a"),
                             Active = true,
                             Age = 23,
-                            CreatedAt = new DateTime(2024, 8, 28, 12, 0, 45, 598, DateTimeKind.Utc).AddTicks(1026),
+                            CreatedAt = new DateTime(2024, 8, 28, 9, 8, 59, 470, DateTimeKind.Utc).AddTicks(5483),
                             DeletedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Email = "admin@example.com",
                             Gender = "Male",
@@ -369,10 +372,10 @@ namespace RepoCoupleQuiz.Migrations
                         },
                         new
                         {
-                            GlobalId = new Guid("3b7629df-2b28-4177-b7b7-4d47eab1d985"),
+                            GlobalId = new Guid("81db4661-3377-47fb-a13a-778ed21ac95d"),
                             Active = true,
                             Age = 23,
-                            CreatedAt = new DateTime(2024, 8, 28, 12, 0, 45, 598, DateTimeKind.Utc).AddTicks(1046),
+                            CreatedAt = new DateTime(2024, 8, 28, 9, 8, 59, 470, DateTimeKind.Utc).AddTicks(5487),
                             DeletedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Email = "user@example.com",
                             Gender = "Male",
@@ -464,23 +467,23 @@ namespace RepoCoupleQuiz.Migrations
                     b.HasData(
                         new
                         {
-                            GlobalId = new Guid("e574ca83-f58f-4a31-9abb-dac1c550097c"),
+                            GlobalId = new Guid("a8dad279-bdc7-4696-a265-ce046fbdb86b"),
                             Active = false,
                             CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             DeletedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            RoleId = new Guid("07474320-84d3-4a11-93c6-451d9eda4917"),
+                            RoleId = new Guid("becc6319-ebe3-483e-a3f0-7d23c1b90655"),
                             UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            UserId = new Guid("d33fdcd7-dc46-494e-9cb2-18e9691a7761")
+                            UserId = new Guid("bb17a0e0-e132-463f-b169-7caff02b4f5a")
                         },
                         new
                         {
-                            GlobalId = new Guid("ea9b40e4-e1ff-4789-bb56-e8193a87da89"),
+                            GlobalId = new Guid("f727797e-0176-4303-9d76-7d9d3acd6b3d"),
                             Active = false,
                             CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             DeletedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            RoleId = new Guid("27de20da-4899-4aa4-90ae-9eaee65f798c"),
+                            RoleId = new Guid("9108c8a5-7e49-4edc-bce2-97b5c2d7a0be"),
                             UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            UserId = new Guid("3b7629df-2b28-4177-b7b7-4d47eab1d985")
+                            UserId = new Guid("81db4661-3377-47fb-a13a-778ed21ac95d")
                         });
                 });
 
@@ -489,7 +492,8 @@ namespace RepoCoupleQuiz.Migrations
                     b.HasOne("RepoCoupleQuiz.Models.User", "RecieverUser")
                         .WithMany("ReceivedInvitation")
                         .HasForeignKey("RecieverUserId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.HasOne("RepoCoupleQuiz.Models.User", "SenderUser")
                         .WithMany("SentInvitation")

@@ -17,6 +17,7 @@ namespace RepoCoupleQuiz.Data
         public DbSet<UserAnswers> UserAnswer { get; set; }
         public DbSet<SessionHistory> SessionHistory { get; set; }
         public DbSet<Result> Result { get; set; }
+        public DbSet<SentQuestion> SentQuestion { get; set; }
         public DbSet<PartnerInvitation> PartnerInvitation { get; set; }
         //  public DbSet<Progress> Progresses { get; set; }
 
