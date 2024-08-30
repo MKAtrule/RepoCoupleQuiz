@@ -9,6 +9,7 @@ namespace RepoCoupleQuiz.DTO.RequestDTO
         [Required]
         [MaxLength(250)]
         public string Text { get; set; }
+       
         public ICollection<OptionRequestDTO> Options { get; set; }
     }
 }

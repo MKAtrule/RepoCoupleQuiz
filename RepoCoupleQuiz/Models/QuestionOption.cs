@@ -10,7 +10,7 @@ namespace RepoCoupleQuiz.Models
 
         public string OptionText { get; set; }
         public int OptionOrder { get; set; }
-        public bool IsCorrect { get; set; }
+       // public bool IsCorrect { get; set; }
         public ICollection<UserAnswers> UserAnswersSelf { get; set; }
         public ICollection<UserAnswers> UserAnswersPartner { get; set; }
     }

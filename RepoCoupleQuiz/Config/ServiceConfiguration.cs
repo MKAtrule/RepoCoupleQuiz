@@ -25,7 +25,12 @@ namespace RepoCoupleQuiz.Config
             services.AddScoped<AuthService>();
             services.AddScoped<IPartnerInvitationRepository, PartnerInvitationRepository>();
             services.AddScoped<PartnerInvitationService>();
+            services.AddScoped<IUserAnswerRepository, UserAnswerRepository>();
             services.AddAutoMapper(typeof(Program).Assembly);
+            services.AddScoped<ISessionHistoryRepository, SessionHistoryRepository>();
+            services.AddScoped<IResultRepository, ResultRepository>();
+            services.AddScoped<UserAnswersService>();
+            services.AddScoped<SessionHistoryService>();
         }
     }
 }

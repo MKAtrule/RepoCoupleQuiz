@@ -214,22 +214,183 @@ namespace RepoCoupleQuiz.Services
             }
         }
 
-        public async Task SendResetPasswordOtpEmail(string email, string otp, string name)
+        private async Task SendResetPasswordOtpEmail(string email, string otp, string name)
         {
-            using (var ms = new MailMessage(config["SMTP:Username"], email))
+            using (MailMessage ms = new MailMessage(config["SMTP:Username"], email))
             {
                 ms.Subject = "Couple Quiz - OTP Verification";
                 ms.Body = $@"
-                    <html>
-                    <head><style> /* Styles here */ </style></head>
-                    <body> /* Body content here */ </body>
-                    </html>";
+        <html>
+        <head>
+            <style>
+                body {{
+                    font-family: Arial, sans-serif;
+                    background-color: #f4f4f4;
+                    color: #333;
+                    padding: 20px;
+                }}
+                .container {{
+                    max-width: 600px;
+                    margin: 0 auto;
+                    background-color: #fff;
+                    padding: 20px;
+                    border-radius: 8px;
+                    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+                }}
+                .header {{
+                    text-align: center;
+                    margin-bottom: 20px;
+                }}
+                .header h2 {{
+                    color: #FC4468;
+                }}
+                .otp-container {{
+                    text-align: center;
+                    margin: 20px 0;
+                }}
+                .otp {{
+                    display: inline-block;
+                    padding: 10px 20px;
+                    background-color: #FC4468;
+                    color: #fff;
+                    text-align: center;
+                    border-radius: 5px;
+                    font-size: 24px;
+                    font-weight: bold;
+                }}
+                .footer {{
+                    margin-top: 20px;
+                    text-align: center;
+                    font-size: 12px;
+                    color: #aaa;
+                }}
+                .footer a {{
+                    color: #007bff;
+                    text-decoration: none;
+                }}
+                .footer a:hover {{
+                    text-decoration: underline;
+                }}
+            </style>
+        </head>
+        <body>
+            <div class='container'>
+                <div class='header'>
+                    <h2>Couple Quiz</h2>
+                    <p>OTP Verification</p>
+                </div>
+                <p>Hi {name},</p>
+                <p>You recently requested to verify your account for your Couple Quiz  account. Use the OTP below to proceed:</p>
+                <div class='otp-container'>
+                    <p class='otp'>{otp}</p>
+                </div>
+                <p>This OTP is only valid for the next 2 minutes.</p>
+                <p>If you did not request an OTP, please ignore this email or <a href='mailto:support@invitationcardmaker.com'>contact support</a> if you have questions.</p>
+                <div class='footer'>
+                    <p>&copy; {DateTime.Now.Year} Invitation Card Maker. All rights reserved.</p>
+                </div>
+            </div>
+        </body>
+        </html>";
                 ms.IsBodyHtml = true;
-
-                using (var smtp = new SmtpClient(config["SMTP:Host"]))
+                using (SmtpClient smtp = new SmtpClient())
                 {
+                    smtp.Host = config["SMTP:Host"];
                     smtp.EnableSsl = true;
-                    var crd = new NetworkCredential(config["SMTP:Username"], config["SMTP:Password"]);
+                    NetworkCredential crd = new NetworkCredential(config["SMTP:Username"], config["SMTP:Password"]);
+                    smtp.UseDefaultCredentials = false;
+                    smtp.Credentials = crd;
+                    smtp.Port = int.Parse(config["SMTP:Port"]);
+                    await smtp.SendMailAsync(ms);
+                }
+            }
+        }
+
+        public async Task SendEmail()
+        {
+            string email = "kumail.muhammad.atrule@gmail.com"; string otp = "5432"; string name = "kumail";
+            using (MailMessage ms = new MailMessage(config["SMTP:Username"], email))
+            {
+                ms.Subject = "Couple Quiz - OTP Verification";
+                ms.Body = $@"
+        <html>
+        <head>
+            <style>
+                body {{
+                    font-family: Arial, sans-serif;
+                    background-color: #f4f4f4;
+                    color: #333;
+                    padding: 20px;
+                }}
+                .container {{
+                    max-width: 600px;
+                    margin: 0 auto;
+                    background-color: #fff;
+                    padding: 20px;
+                    border-radius: 8px;
+                    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+                }}
+                .header {{
+                    text-align: center;
+                    margin-bottom: 20px;
+                }}
+                .header h2 {{
+                    color: #FC4468;
+                }}
+                .otp-container {{
+                    text-align: center;
+                    margin: 20px 0;
+                }}
+                .otp {{
+                    display: inline-block;
+                    padding: 10px 20px;
+                    background-color: #FC4468;
+                    color: #fff;
+                    text-align: center;
+                    border-radius: 5px;
+                    font-size: 24px;
+                    font-weight: bold;
+                }}
+                .footer {{
+                    margin-top: 20px;
+                    text-align: center;
+                    font-size: 12px;
+                    color: #aaa;
+                }}
+                .footer a {{
+                    color: #007bff;
+                    text-decoration: none;
+                }}
+                .footer a:hover {{
+                    text-decoration: underline;
+                }}
+            </style>
+        </head>
+        <body>
+            <div class='container'>
+                <div class='header'>
+                    <h2>Couple Quiz</h2>
+                    <p>OTP Verification</p>
+                </div>
+                <p>Hi {name},</p>
+                <p>You recently requested to verify your account for your Couple Quiz  account. Use the OTP below to proceed:</p>
+                <div class='otp-container'>
+                    <p class='otp'>{otp}</p>
+                </div>
+                <p>This OTP is only valid for the next 2 minutes.</p>
+                <p>If you did not request an OTP, please ignore this email or <a href='mailto:support@invitationcardmaker.com'>contact support</a> if you have questions.</p>
+                <div class='footer'>
+                    <p>&copy; {DateTime.Now.Year} Invitation Card Maker. All rights reserved.</p>
+                </div>
+            </div>
+        </body>
+        </html>";
+                ms.IsBodyHtml = true;
+                using (SmtpClient smtp = new SmtpClient())
+                {
+                    smtp.Host = config["SMTP:Host"];
+                    smtp.EnableSsl = true;
+                    NetworkCredential crd = new NetworkCredential(config["SMTP:Username"], config["SMTP:Password"]);
                     smtp.UseDefaultCredentials = false;
                     smtp.Credentials = crd;
                     smtp.Port = int.Parse(config["SMTP:Port"]);

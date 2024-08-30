@@ -2,15 +2,14 @@
 using RepoCoupleQuiz.Data;
 using RepoCoupleQuiz.Interface;
 using RepoCoupleQuiz.Models;
-using RepoCoupleQuiz.Repository;
 
-namespace RepoCoupleQuiz.Services
+namespace RepoCoupleQuiz.Repository
 {
-    public class SentQuestionRepository : BaseRepository<SentQuestion>,ISentQuestionRepository
+    public class SentQuestionRepository : BaseRepository<SentQuestion>, ISentQuestionRepository
     {
         private readonly ApplicationDbContext _context;
 
-        public SentQuestionRepository(ApplicationDbContext context):base(context) 
+        public SentQuestionRepository(ApplicationDbContext context) : base(context)
         {
             _context = context;
         }

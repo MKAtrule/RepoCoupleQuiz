@@ -31,7 +31,6 @@ namespace RepoCoupleQuiz.Services
              QuestionOption{
                 QuestionId=newQuestion.GlobalId,
                 OptionText=op.Text,
-                IsCorrect=op.IsCorrect,
                 Active=true
               }
              ).ToList();
@@ -48,7 +47,7 @@ namespace RepoCoupleQuiz.Services
         public async Task<QuestionResponseDTO> GetQuestionById(Guid id)
         {
             var question = await questionRepository.GetById(id);
-            var options= question.QuestionOption.Select(op =>new OptionRequestDTO {OptionId=op.GlobalId ,Text=op.OptionText,IsCorrect=op.IsCorrect}).ToList();
+            var options= question.QuestionOption.Select(op =>new OptionRequestDTO {OptionId=op.GlobalId ,Text=op.OptionText}).ToList();
             List<OptionRequestDTO> OptionsText= mapper.Map<List<OptionRequestDTO>>(options);
             return new QuestionResponseDTO
             {
@@ -80,7 +79,6 @@ namespace RepoCoupleQuiz.Services
 
                 if (existingOption != null)
                 {
-                    existingOption.IsCorrect = optionDto.IsCorrect;
                     updatedOptions.Add(existingOption);
                 }
                 else
@@ -89,7 +87,7 @@ namespace RepoCoupleQuiz.Services
                     {
                         QuestionId = question.GlobalId,
                         OptionText = optionDto.Text,
-                        IsCorrect = optionDto.IsCorrect,
+           
                         Active = true
                     };
                     updatedOptions.Add(newOption);
@@ -139,8 +137,20 @@ namespace RepoCoupleQuiz.Services
             var selectedQuestion = availableQuestions[randomIndex];
 
             await sentQuestionRepository.MarkAsSentAsync(selectedQuestion.GlobalId);
+            var response = new QuestionResponseDTO
+            { 
+            QuestionId=selectedQuestion.GlobalId,
+            Text = selectedQuestion.QuestionText,
+            Options=selectedQuestion.QuestionOption.Select(
+                qo=>new OptionRequestDTO {
+                    OptionId=qo.GlobalId,
+                    Text=qo.OptionText
+                }).ToList(),
+            
+            };
 
-            var response = mapper.Map<QuestionResponseDTO>(selectedQuestion);
+
+         //   var response = mapper.Map<QuestionResponseDTO>(selectedQuestion);
             return response;
         }
 

@@ -1,8 +1,6 @@
 using Hangfire;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using RepoCoupleQuiz.Config;
 using RepoCoupleQuiz.Data;
@@ -36,7 +34,6 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:Key"]))
     });
 
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddCors(options =>
@@ -72,9 +69,7 @@ var recurringJobs = app.Services.GetRequiredService<IRecurringJobManager>();
 recurringJobs.AddOrUpdate<QuestionService>(
     "Send Daily Question",
     service => service.SendDailyQuestionAsync(),
-    Cron.MinuteInterval(1));  
-
-
+    Cron.DayInterval(1));
 app.MapControllers();
 
 app.Run();

@@ -43,29 +43,29 @@ namespace RepoCoupleQuiz.Services
             var userExist = await authRepository.GetByIdAsync(request.UserId);
             if (userExist != null)
             {
-                var isValid =await partnerInvitationRepository.CodeValidation(request.Code);
-                if(isValid)
+                var isValid = await partnerInvitationRepository.CodeValidation(request.Code);
+                if (isValid)
                 {
                     var sessionDetails = await partnerInvitationRepository.GetInvitationDetails(request.Code);
-                    sessionDetails.RecieverUserId= request.UserId;
+                    sessionDetails.RecieverUserId = request.UserId;
                     sessionDetails.IsCodeUsed = true;
-                    sessionDetails.CodeExpires= DateTime.UtcNow;
-                    var updatePartnerInvitation= await partnerInvitationRepository.Update(sessionDetails);
+                    sessionDetails.CodeExpires = DateTime.UtcNow;
+                    var updatePartnerInvitation = await partnerInvitationRepository.Update(sessionDetails);
                     return new PartnerInvitationResponseDTO
                     {
-                    SenderId= updatePartnerInvitation.SenderUserId,
-                    SenderName= updatePartnerInvitation.SenderUser.Name,    
-                    SenderImage=updatePartnerInvitation.SenderUser.ProfileImage,
-                    RecieverId= request.UserId,
-                    RecieverImage= updatePartnerInvitation.RecieverUser.ProfileImage,
-                    RecieverName=updatePartnerInvitation.RecieverUser.Name,
+                        SenderId = updatePartnerInvitation.SenderUserId,
+                        SenderName = updatePartnerInvitation.SenderUser.Name,
+                        SenderImage = updatePartnerInvitation.SenderUser.ProfileImage,
+                        RecieverId = updatePartnerInvitation.RecieverUserId,
+                        RecieverImage = updatePartnerInvitation.RecieverUser.ProfileImage,
+                        RecieverName = updatePartnerInvitation.RecieverUser.Name,
                     };
                 }
                 else
                 {
                     throw new Exception("Code is not Valid");
                 }
-            }
+            } 
             else
             {
                 throw new Exception("User with this Id not Found");

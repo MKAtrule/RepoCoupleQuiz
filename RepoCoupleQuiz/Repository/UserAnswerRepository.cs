@@ -1,4 +1,5 @@
-﻿using RepoCoupleQuiz.Data;
+﻿using Microsoft.EntityFrameworkCore;
+using RepoCoupleQuiz.Data;
 using RepoCoupleQuiz.Interface;
 using RepoCoupleQuiz.Models;
 
@@ -11,6 +12,12 @@ namespace RepoCoupleQuiz.Repository
         {
             _context = context;
         }
-
+        public async Task<UserAnswers> GetAnswerByUserAndQuestion(Guid userId, Guid questionId)
+        {
+            return await _context.UserAnswer
+                .FirstOrDefaultAsync(ua => ua.UserId == userId
+                                           && ua.QuestionId == questionId
+                                           ); 
+        }
     }
 }

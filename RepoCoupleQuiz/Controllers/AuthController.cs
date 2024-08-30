@@ -4,7 +4,7 @@ using RepoCoupleQuiz.Services;
 
 namespace RepoCoupleQuiz.Controllers
 {
-    public class AuthController : Controller
+    public class AuthController : BaseController
     {
         private readonly AuthService _authService;
         public AuthController(AuthService authService)

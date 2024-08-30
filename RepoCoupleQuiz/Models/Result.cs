@@ -15,9 +15,15 @@ namespace RepoCoupleQuiz.Models
         [ForeignKey("Question")]
         public Guid QuestionId { get; set; }
         public Question Question { get; set; }
+        [ForeignKey("PartnerInvitation")]
+        public Guid PartnerInvitationId { get; set; }
+        public PartnerInvitation PartnerInvitation { get; set; }
+        public bool IsAnswerCorrectAboutPartner { get; set; }
+        public bool IsBothMatch { get; set; }
+        public int UserScore { get; set; }
+        public int PartnerScore { get; set; }
+        public DateTime ResultDate { get; set; } 
 
-        public bool IsMatch { get; set; }
-        public int Score { get; set; }
     }
-   
+
 }

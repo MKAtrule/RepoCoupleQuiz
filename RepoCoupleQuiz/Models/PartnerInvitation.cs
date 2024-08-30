@@ -17,5 +17,6 @@ namespace RepoCoupleQuiz.Models
         public bool IsCodeUsed { get; set; }
         public DateTime CodeExpires { get; set; }
         public ICollection<UserAnswers> UserAnswers { get; set; }
+        public ICollection<SessionHistory> SessionHistory { get; set; }
     }
 }
