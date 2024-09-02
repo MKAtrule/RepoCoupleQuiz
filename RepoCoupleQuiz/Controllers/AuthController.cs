@@ -53,7 +53,7 @@ namespace RepoCoupleQuiz.Controllers
                 return BadRequest(new { Messsage = ex.Message });
             }
         }
-        [HttpPost("RefreshToken")]
+        [HttpGet("RefreshToken")]
         public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequestDTO request)
         {
 

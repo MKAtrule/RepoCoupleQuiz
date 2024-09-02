@@ -53,6 +53,7 @@ namespace RepoCoupleQuiz.Services
                     var updatePartnerInvitation = await partnerInvitationRepository.Update(sessionDetails);
                     return new PartnerInvitationResponseDTO
                     {
+                        PartnerInvitationId=updatePartnerInvitation.GlobalId,
                         SenderId = updatePartnerInvitation.SenderUserId,
                         SenderName = updatePartnerInvitation.SenderUser.Name,
                         SenderImage = updatePartnerInvitation.SenderUser.ProfileImage,

@@ -129,7 +129,7 @@ namespace RepoCoupleQuiz.Services
 
             if (!availableQuestions.Any())
             {
-                throw new Exception("All questions have been snet No more questions available.");
+                throw new Exception("All questions have been sent No more questions available.");
             }
 
             var random = new Random();

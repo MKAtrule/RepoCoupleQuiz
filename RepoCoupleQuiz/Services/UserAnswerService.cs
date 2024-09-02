@@ -55,14 +55,29 @@ namespace RepoCoupleQuiz.Services
             
             foreach (var userAnswer in userAnswers)
                 {
-                    await userAnswersRepository.Create(userAnswer);
+                  var newUserAnswer=  await userAnswersRepository.Create(userAnswer);
                     if (userAnswers.Count == 1)
                     {
-                    //abhi kiya krna h k is m jo jisna attempt nhi kiya usy assign krna h
+                    var userAttempted =await userAnswersRepository.GetUserWhoAttemptedQuestion(newUserAnswer.GlobalId);
+                    var userId = Guid.NewGuid();
+                    var partnerUserId=Guid.NewGuid();                   
+                    if(userAttempted.PartnerInvitation.SenderUserId == userAnswer.UserId)
+                     {
+                            userId=(Guid)userAttempted.PartnerInvitation.RecieverUserId;
+                            partnerUserId =userAttempted.PartnerInvitation.SenderUserId;
+                     }
+                    else
+                    {
+                        userId=userAttempted.PartnerInvitation.SenderUserId ;
+                        partnerUserId=(Guid)userAttempted.PartnerInvitation.RecieverUserId ;
+                    }
+                   
+                    
                     var sessionHistory = new SessionHistory
                     {
-                        UserId = userAnswer.UserId,
-                        PartnerUserId = (Guid)session.RecieverUserId,
+
+                        UserId = userId,
+                        PartnerUserId = partnerUserId,
                         QuestionId = userAnswer.QuestionId,
                         PartnerInvitationId = session.GlobalId,
                         IsAttempted = false,
@@ -71,7 +86,6 @@ namespace RepoCoupleQuiz.Services
 
                     await sessionHistoryRepository.Create(sessionHistory);
                     throw new Exception("Your Partner Not Attempted yet");
-                    break;
                  }
                 else
                 {
@@ -127,23 +141,12 @@ namespace RepoCoupleQuiz.Services
                             break;
                         }
                     }
-                    //result.User.Name =firstAnswer.User.Name;
-                    //result.PartnerUser.Name = firstAnswer.User.Name;
                     result.UserId = request.UserId;
                     result.PartnerUserId = (Guid)session.RecieverUserId;
                     result.QuestionId = firstAnswer.QuestionId;
                     result.PartnerInvitationId = session.GlobalId;
 
                     var newResult = await resultRepository.Create(result);
-                //var resultRespo = new UserAnswerResultResponseDTO()
-                //{
-                //    UserName=newResult.User.Name,
-                //    PartnerUserName=newResult.PartnerUser.Name,
-                //    IsAnswerCorrectAboutPartner=newResult.IsAnswerCorrectAboutPartner,
-                //    UserScore=newResult.UserScore,
-                //    PartnerScore=newResult.PartnerScore,
-
-                //};
                    var resultResponse = mapper.Map<UserAnswerResultResponseDTO>(newResult);
                     resultResponses.Add(resultResponse);
                 }

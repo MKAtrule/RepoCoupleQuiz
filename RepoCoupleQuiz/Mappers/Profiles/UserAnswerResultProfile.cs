@@ -10,6 +10,7 @@ namespace RepoCoupleQuiz.Mappers.Profiles
         {
             CreateMap<Result, UserAnswerResultResponseDTO>()
               .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User.Name))
+           
               .ForMember(dest => dest.PartnerUserName, opt => opt.MapFrom(src => src.PartnerUser.Name))
               //      .ForMember(dest => dest.IsAnswerCorrectAboutPartner, opt => opt.MapFrom(src => src.IsMatch))
               .ForMember(dest => dest.AreBothAnswersMatching, opt => opt.MapFrom(src => src.IsBothMatch))

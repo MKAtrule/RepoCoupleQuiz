@@ -45,6 +45,14 @@ namespace RepoCoupleQuiz.Repository
                                  .Where(us => us.UserId == userId && !us.IsAttempted)
                                  .ToListAsync();
         }
+        public async Task<bool> HasUserAttemptedAsync(Guid userId, Guid partnerInvitationId)
+        {
+            return await _context.SessionHistory
+                .AnyAsync(sh => sh.UserId == userId
+                                && sh.PartnerInvitationId == partnerInvitationId
+                                && sh.IsAttempted == true);
+        }
+
 
     }
 }

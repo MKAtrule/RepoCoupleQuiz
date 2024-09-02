@@ -7,7 +7,6 @@ namespace RepoCoupleQuiz.Interface
     {
         Task<List<SessionHistory>> GetSessionHistoryByIdAsync(Guid userId);
         Task<SessionDetailsRequestDTO> GetSessionDetailsBySessionIdAsync(Guid sessionId, Guid userId);
-        //Task<SessionHistory> GetSessionsByUserIdAsync();
-        //Task<List<SessionHistory>> GetUnattemptedSessionsAsync(Guid userId);
+        Task<bool> HasUserAttemptedAsync(Guid userId, Guid partnerInvitationId);
     }
 }

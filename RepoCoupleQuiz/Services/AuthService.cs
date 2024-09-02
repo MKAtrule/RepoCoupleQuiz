@@ -180,13 +180,13 @@ namespace RepoCoupleQuiz.Services
 
             var roles = await userRoleRepository.GetUserRolesAsync(user.GlobalId);
             var newToken = await GenerateToken(user, roles);
-            var newRefreshToken = GenerateRefreshToken();
-            await authRepository.SaveRefreshTokenAsync(user, newRefreshToken);
+            //var newRefreshToken = GenerateRefreshToken();
+       //     await authRepository.SaveRefreshTokenAsync(user, newRefreshToken);
 
             return new AuthResponseDTO
             {
                 JwtToken = newToken,
-                RefreshToken = newRefreshToken
+                RefreshToken =request.RefreshToken,
             };
         }
         public async Task ForgotPasswordAsync(ForgotPasswordRequestDTO request)

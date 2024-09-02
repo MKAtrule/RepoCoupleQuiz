@@ -23,7 +23,7 @@ namespace RepoCoupleQuiz.Services
             {
                 SessionId = sh.PartnerInvitationId,
                 UnAttemptedQuestionDTOs = new List<UnAttemptedQuestionDTO>
-        {
+                {
             new UnAttemptedQuestionDTO
             {
                 QuestionId = sh.Question.GlobalId,
@@ -34,7 +34,7 @@ namespace RepoCoupleQuiz.Services
                     Text = op.OptionText,
                 }).ToList(),
             }
-        }
+                }
             }).ToList();
 
             return unattemptedSessionDTOs;

@@ -19,5 +19,10 @@ namespace RepoCoupleQuiz.Repository
                                            && ua.QuestionId == questionId
                                            ); 
         }
+        public async Task<UserAnswers> GetUserWhoAttemptedQuestion(Guid userAnswerId)
+        {
+           return await _context.UserAnswer
+                          .FirstOrDefaultAsync(ua => ua.GlobalId == userAnswerId);
+        }
     }
 }
