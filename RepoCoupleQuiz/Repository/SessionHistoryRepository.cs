@@ -13,26 +13,13 @@ namespace RepoCoupleQuiz.Repository
         {
             _context = context;
         }
-        public async Task<SessionDetailsRequestDTO> GetSessionDetailsBySessionIdAsync(Guid sessionId, Guid userId)
+        public async Task<SessionHistory> GetSessionDetailsBySessionIdAsync(Guid sessionId, Guid userId)
         {
-            var sessionDetails = new SessionDetailsRequestDTO
-            {
-                SessionHistory = await _context.SessionHistory
-                    .Where(sh => sh.PartnerInvitationId == sessionId && sh.Active)
-                    .ToListAsync(),
-                UserAnswer = await _context.UserAnswer
-                    .Where(ua => ua.PartnerInvitationId == sessionId )
-                    .ToListAsync(),
-                Result = await _context.Result
-                    .Where(r => r.PartnerInvitationId == sessionId )
-                    .ToListAsync(),
-
-                UnattemptedQuestions = await _context.Question
-                    .Where(q => !_context.UserAnswer
-                        .Any(ua => ua.UserId == userId && ua.QuestionId == q.GlobalId && ua.PartnerInvitationId == sessionId))
-                    .ToListAsync()
-            };
-            return sessionDetails;
+            return await _context.SessionHistory
+                                 .Include(us => us.User)
+                                 .Include(pt => pt.PartnerUser)
+                                 .Include(q => q.Question)
+                                 .FirstOrDefaultAsync(sh=>sh.GlobalId==sessionId && sh.UserId==userId);
         }
         public async Task<List<SessionHistory>> GetSessionHistoryByIdAsync(Guid userId)
         {
@@ -45,11 +32,12 @@ namespace RepoCoupleQuiz.Repository
                                  .Where(us => us.UserId == userId && !us.IsAttempted)
                                  .ToListAsync();
         }
-        public async Task<bool> HasUserAttemptedAsync(Guid userId, Guid partnerInvitationId)
+        public async Task<SessionHistory> HasUserAttemptedAsync(Guid userId,Guid questionId, Guid partnerInvitationId)
         {
             return await _context.SessionHistory
-                .AnyAsync(sh => sh.UserId == userId
+                .FirstOrDefaultAsync(sh => sh.PartnerUserId == userId
                                 && sh.PartnerInvitationId == partnerInvitationId
+                                && sh.QuestionId == questionId
                                 && sh.IsAttempted == true);
         }
 

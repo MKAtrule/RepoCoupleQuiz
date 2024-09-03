@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using RepoCoupleQuiz.DTO.RequestDTO;
 using RepoCoupleQuiz.Services;
 
@@ -11,6 +12,7 @@ namespace RepoCoupleQuiz.Controllers
         {
             this.userAnswersService = userAnswersService;
         }
+   //     [Authorize]
         [HttpPost("Result")]
         public async Task<IActionResult> Create([FromBody] UserAnswersRequestDTO request)
         {

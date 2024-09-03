@@ -6,5 +6,6 @@ namespace RepoCoupleQuiz.Interface
     {
         Task<UserAnswers> GetAnswerByUserAndQuestion(Guid userId, Guid questionId);
         Task<UserAnswers> GetUserWhoAttemptedQuestion(Guid userAnswerId);
+        Task<List<UserAnswers>> GetUserAnswersAsync(Guid userId,Guid sessionId);
     }
 }

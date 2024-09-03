@@ -2,11 +2,10 @@
 
 namespace RepoCoupleQuiz.DTO.RequestDTO
 {
-    public class QuestionRequestDTO
+    public class OptionCreateRequestDTO
     {
         [Required]
-        [MaxLength(250)]
         public string Text { get; set; }
-        public ICollection<OptionCreateRequestDTO> Options { get; set; }
+
     }
 }

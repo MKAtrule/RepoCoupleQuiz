@@ -27,6 +27,7 @@ namespace RepoCoupleQuiz.Controllers
                     refreshToken = authResponse.RefreshToken,
                     Email = authResponse.Email,
                     UserName = authResponse.UserName,
+                    UserId = authResponse.UserId,
                     message = "Login Successfully"
                 });
             }
@@ -53,7 +54,7 @@ namespace RepoCoupleQuiz.Controllers
                 return BadRequest(new { Messsage = ex.Message });
             }
         }
-        [HttpGet("RefreshToken")]
+        [HttpPost("RefreshToken")]
         public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequestDTO request)
         {
 
@@ -130,25 +131,25 @@ namespace RepoCoupleQuiz.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
-        [HttpPost("ResetPassword")]
-        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequestDTO request)
-        {
-            try
-            {
-                return new JsonResult
-                    (
-                    new
-                    {
-                        success = true,
-                        data = await _authService.ResetPasswordAsync(request),
-                        Message = "Password Reset SuccessFully",
-                    });
-            }
+        //[HttpPost("ResetPassword")]
+        //public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequestDTO request)
+        //{
+        //    try
+        //    {
+        //        return new JsonResult
+        //            (
+        //            new
+        //            {
+        //                success = true,
+        //                data = await _authService.ResetPasswordAsync(request),
+        //                Message = "Password Reset SuccessFully",
+        //            });
+        //    }
 
-            catch (Exception ex)
-            {
-                return new JsonResult(new { error = ex.Message });
-            }
-        }
+        //    catch (Exception ex)
+        //    {
+        //        return new JsonResult(new { error = ex.Message });
+        //    }
+        //}
     }
 }

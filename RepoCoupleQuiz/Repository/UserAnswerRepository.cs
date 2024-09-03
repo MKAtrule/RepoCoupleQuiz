@@ -19,6 +19,16 @@ namespace RepoCoupleQuiz.Repository
                                            && ua.QuestionId == questionId
                                            ); 
         }
+
+        public async Task<List<UserAnswers>> GetUserAnswersAsync(Guid userId, Guid sessionId)
+        {
+             return await  _context.UserAnswer
+                                   .Include(q=>q.Question)
+                                   .Include(us=>us.User)
+                                   .Include(pi=>pi.PartnerInvitation)
+                                   .ToListAsync();
+        }
+
         public async Task<UserAnswers> GetUserWhoAttemptedQuestion(Guid userAnswerId)
         {
            return await _context.UserAnswer

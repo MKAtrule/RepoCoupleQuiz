@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using RepoCoupleQuiz.DTO.RequestDTO;
 using RepoCoupleQuiz.Services;
 
@@ -11,6 +12,7 @@ namespace RepoCoupleQuiz.Controllers
         {
             this.partnerInvitationService = partnerInvitationService;
         }
+        [Authorize(Roles ="User")]
         [HttpPost("GenerateCode")]
         public async Task<IActionResult> GenerateCode([FromBody] GenerateCodeRequestDTO request)
         {
@@ -29,6 +31,7 @@ namespace RepoCoupleQuiz.Controllers
                 return BadRequest(new { Messsage = ex.Message });
             }
         }
+        [Authorize(Roles ="User")]
         [HttpPost("PartnerJoining")]
         public async Task<IActionResult> PartnerJoin([FromBody] PartnerInvitationJoiningRequestDTO request)
         {

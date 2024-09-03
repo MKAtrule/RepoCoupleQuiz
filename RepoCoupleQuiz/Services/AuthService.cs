@@ -100,6 +100,7 @@ namespace RepoCoupleQuiz.Services
                     RefreshToken = refreshToken,
                     Email = user.Email,
                     UserName = user.Name,
+                    UserId = user.GlobalId,
                 };
             }
             else

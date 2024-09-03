@@ -14,12 +14,12 @@ namespace RepoCoupleQuiz.Repository
             _context = context;
         }
 
-        public async Task MarkAsSentAsync(Guid questionId)
+        public async Task MarkAsSentAsync(Guid questionId,DateTime today)
         {
             var sentQuestion = new SentQuestion
             {
                 QuestionId = questionId,
-                SentDate = DateTime.UtcNow
+                SentDate = today
             };
             await _context.SentQuestion.AddAsync(sentQuestion);
             await _context.SaveChangesAsync();
@@ -31,5 +31,12 @@ namespace RepoCoupleQuiz.Repository
                                  .Select(sq => sq.QuestionId)
                                  .ToListAsync();
         }
+        public async Task<List<SentQuestion>> GetSentQuestionsByDateAsync(DateTime date)
+        {
+            return await _context.SentQuestion
+                                 .Where(sq => sq.SentDate.Date == date)
+                                 .ToListAsync();
+        }
+
     }
 }

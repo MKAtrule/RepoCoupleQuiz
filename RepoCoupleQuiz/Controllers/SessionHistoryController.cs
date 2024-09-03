@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using RepoCoupleQuiz.Services;
 
 namespace RepoCoupleQuiz.Controllers
@@ -10,7 +11,8 @@ namespace RepoCoupleQuiz.Controllers
         {
             this.sessionHistoryService = sessionHistoryService;
         }
-        [HttpGet("{id}")]
+        [Authorize]
+        [HttpGet("GetSessionHistory")]
         public async Task<IActionResult> GetUnAttemptedQuestionForUsers(Guid id)
         {
             try

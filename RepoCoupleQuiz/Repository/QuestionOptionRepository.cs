@@ -31,5 +31,10 @@ namespace RepoCoupleQuiz.Repository
              _context.QuestionOption.UpdateRange(options);
             await _context.SaveChangesAsync();
         }
+        public async Task<QuestionOption> GetOptionById(Guid id)
+        {
+            return await _context.QuestionOption
+                                 .FirstOrDefaultAsync(op=>op.GlobalId==id);
+        }
     }
 }

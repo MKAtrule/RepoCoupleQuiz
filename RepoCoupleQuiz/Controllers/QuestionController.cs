@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using RepoCoupleQuiz.DTO.RequestDTO;
 using RepoCoupleQuiz.Services;
 
@@ -11,7 +12,8 @@ namespace RepoCoupleQuiz.Controllers
         {
             this.questionService = questionService;
         }
-        [HttpPost("create")]
+        [Authorize(Roles ="Admin")]
+        [HttpPost("Create")]
         public async Task<IActionResult> Create([FromBody] QuestionRequestDTO request)
         {
             try
@@ -29,7 +31,8 @@ namespace RepoCoupleQuiz.Controllers
                 return BadRequest(new { Messsage = ex.Message });
             }
         }
-        [HttpGet("{id}")]
+        [Authorize(Roles ="Admin")]
+        [HttpGet("GetQuestionById")]
         public async Task<IActionResult> GetQuestionById( Guid id)
         {
             try
@@ -47,6 +50,7 @@ namespace RepoCoupleQuiz.Controllers
                 return BadRequest(new { Messsage = ex.Message });
             }
         }
+        [Authorize(Roles ="Admin")]
         [HttpPut]
         public async Task<IActionResult> UpdateQuestion([FromBody]UpdateQuestionRequestDTO request)
         {
@@ -65,6 +69,7 @@ namespace RepoCoupleQuiz.Controllers
                 return BadRequest(new { Messsage = ex.Message });
             }
         }
+        //[Authorize]
         [HttpGet("DailyQuestion")]
         public async Task<IActionResult> SendDailyQuestion()
         {
@@ -75,7 +80,7 @@ namespace RepoCoupleQuiz.Controllers
                 {
                     success = true,
                     data = await questionService.SendDailyQuestionAsync(),
-                    Message = "Question Listed Success"
+                    Message = "Question Send Success"
                 });
             }
             catch (Exception ex)

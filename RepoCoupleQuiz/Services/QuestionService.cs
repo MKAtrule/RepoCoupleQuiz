@@ -34,12 +34,26 @@ namespace RepoCoupleQuiz.Services
                 Active=true
               }
              ).ToList();
-            await questionOptionRepository.AddOptions(options);
+            var optionResponselist = new List<OptionRequestDTO>();
+            foreach(var option in options)
+            {
+             var newOption=  await questionOptionRepository.Create(option);
+                var OptionResponse = new OptionRequestDTO()
+                {
+                    OptionId = newOption.GlobalId,
+                    Text = newOption.OptionText,
+                };
+                optionResponselist.Add(OptionResponse);
+            }
             return new QuestionResponseDTO
             {
                 QuestionId=newQuestion.GlobalId,
                 Text=newQuestion.QuestionText,
-                Options=request.Options,
+                Options=optionResponselist.Select(op=>new OptionRequestDTO 
+                {
+                OptionId=op.OptionId,
+                Text=op.Text,
+                }).ToList()
 
             };
 
@@ -47,6 +61,10 @@ namespace RepoCoupleQuiz.Services
         public async Task<QuestionResponseDTO> GetQuestionById(Guid id)
         {
             var question = await questionRepository.GetById(id);
+            if(question is null)
+            {
+                throw new Exception($"Question with this {id} not exist");
+            }
             var options= question.QuestionOption.Select(op =>new OptionRequestDTO {OptionId=op.GlobalId ,Text=op.OptionText}).ToList();
             List<OptionRequestDTO> OptionsText= mapper.Map<List<OptionRequestDTO>>(options);
             return new QuestionResponseDTO
@@ -56,7 +74,6 @@ namespace RepoCoupleQuiz.Services
                 Options=OptionsText,
             };
         }
-
         public async Task<QuestionResponseDTO> UpdateAsync(UpdateQuestionRequestDTO request)
         {
             var question = await questionRepository.GetById(request.QuestionId);
@@ -67,59 +84,52 @@ namespace RepoCoupleQuiz.Services
             }
 
             question.QuestionText = request.Text;
+            var updatedQuestion = await questionRepository.Update(question);    
 
-            var existingOptions = await questionOptionRepository.GetOptionsByQuestionId(request.QuestionId);
+            var existingOptions = await questionOptionRepository.GetOptionsByQuestionId(updatedQuestion.GlobalId);
 
-            var updatedOptions = new List<QuestionOption>();
-
-            foreach (var optionDto in request.Options)
+            var updatedOptions = new List<OptionRequestDTO>();
+            foreach (var option in existingOptions)
             {
-                var existingOption = existingOptions
-                    .FirstOrDefault(eo => eo.OptionText == optionDto.Text);
-
-                if (existingOption != null)
-                {
-                    updatedOptions.Add(existingOption);
+                var Option = await questionOptionRepository.GetOptionById(option.GlobalId);
+                var requestUpdatingOption= request.Options.Where(op=>op.OptionId==Option.GlobalId).FirstOrDefault();
+                if (requestUpdatingOption == null){
+                    throw new Exception($" Option ID  not Found");
                 }
-                else
+                Option.OptionText = requestUpdatingOption.Text;
+                Option.UpdatedAt= System.DateTime.Now;
+                var updatedOption= await questionOptionRepository.Update(Option);
+                var optionResponse = new OptionRequestDTO
                 {
-                    var newOption = new QuestionOption
-                    {
-                        QuestionId = question.GlobalId,
-                        OptionText = optionDto.Text,
-           
-                        Active = true
-                    };
-                    updatedOptions.Add(newOption);
-                }
+                    OptionId = updatedOption.GlobalId,
+                    Text=updatedOption.OptionText,
+                };
+                updatedOptions.Add(optionResponse);
             }
-
-            var optionsToRemove = existingOptions
-                .Where(eo => !request.Options.Any(o => o.Text == eo.OptionText))
-                .ToList();
-
-            await questionRepository.Update(question);
-
-            if (optionsToRemove.Any())
-            {
-                foreach (var option in optionsToRemove)
-                {
-                    await questionOptionRepository.Delete(option);
-                }
-            }
-
-            await questionOptionRepository.UpdateOptions(updatedOptions);
-
             return new QuestionResponseDTO
             {
-                QuestionId = question.GlobalId,
-                Text = question.QuestionText,
-                Options = request.Options
+                 QuestionId=updatedQuestion.GlobalId,
+                 Text=updatedQuestion.QuestionText,
+                 Options=updatedOptions.Select(op=>new OptionRequestDTO
+                 { 
+                 OptionId=op.OptionId,
+                 Text=op.Text,
+                 }
+                 ).ToList()
             };
+
         }
 
         public async Task<QuestionResponseDTO> SendDailyQuestionAsync()
         {
+            var today = DateTime.UtcNow.Date;
+            var sentToday = await sentQuestionRepository.GetSentQuestionsByDateAsync(today);
+
+            if (sentToday.Any())
+            {
+                throw new Exception("The question of the day has already been sent.");
+            }
+
             var sentQuestionIds = await sentQuestionRepository.GetSentQuestionIdsAsync();
             var unsentQuestions = await questionRepository.GetAll();
 
@@ -129,30 +139,30 @@ namespace RepoCoupleQuiz.Services
 
             if (!availableQuestions.Any())
             {
-                throw new Exception("All questions have been sent No more questions available.");
+                throw new Exception("All questions have been sent. No more questions available.");
             }
 
             var random = new Random();
             var randomIndex = random.Next(availableQuestions.Count);
             var selectedQuestion = availableQuestions[randomIndex];
 
-            await sentQuestionRepository.MarkAsSentAsync(selectedQuestion.GlobalId);
-            var response = new QuestionResponseDTO
-            { 
-            QuestionId=selectedQuestion.GlobalId,
-            Text = selectedQuestion.QuestionText,
-            Options=selectedQuestion.QuestionOption.Select(
-                qo=>new OptionRequestDTO {
-                    OptionId=qo.GlobalId,
-                    Text=qo.OptionText
-                }).ToList(),
-            
+            await sentQuestionRepository.MarkAsSentAsync(selectedQuestion.GlobalId, today); 
+
+             var response = new QuestionResponseDTO
+            {
+                QuestionId = selectedQuestion.GlobalId,
+                Text = selectedQuestion.QuestionText,
+                Options = selectedQuestion.QuestionOption.Select(
+                    qo => new OptionRequestDTO
+                    {
+                        OptionId = qo.GlobalId,
+                        Text = qo.OptionText
+                    }).ToList(),
             };
 
-
-         //   var response = mapper.Map<QuestionResponseDTO>(selectedQuestion);
             return response;
         }
+
 
     }
 }
