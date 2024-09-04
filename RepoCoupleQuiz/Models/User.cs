@@ -12,6 +12,7 @@
         public DateTime? RefreshTokenExpiryTime { get; set; }
         public string? ResetPasswordOtp { get; set; }
         public DateTime? ResetPasswordOtpExpiryTime { get; set; }
+        public bool? IsOTpVerified { get; set; }
         public ICollection<UserRole> UserRole { get; set; }
         public ICollection<UserAnswers> UserAnswer { get; set; }
         public ICollection<SessionHistory> SessionHistory { get; set; }

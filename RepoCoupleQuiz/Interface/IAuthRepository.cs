@@ -13,7 +13,7 @@ namespace RepoCoupleQuiz.Interface
         Task<User> GetUserByOtpAsync(string email, string otp);
         Task<User> FindByEmailAsync(string email);
         Task<User> UpdatePassword(string email, string password);
-
+        Task<List<User>> GetUsersWhoNotAttemptedTodayQuestion(List<UserAnswers> users);
 
     }
 }

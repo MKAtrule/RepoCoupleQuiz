@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using RepoCoupleQuiz.DTO.RequestDTO;
 using RepoCoupleQuiz.DTO.ResponseDTO;
 using RepoCoupleQuiz.Interface;
@@ -13,14 +14,18 @@ namespace RepoCoupleQuiz.Services
         private readonly IResultRepository resultRepository;
         private readonly IUserAnswerRepository userAnswersRepository;
         private readonly IPartnerInvitationRepository partnerInvitationRepository;
+        private readonly ISentQuestionRepository sentQuestionRepository;
+        private readonly IAuthRepository authRepository;
         private readonly IMapper mapper;
-        public SessionHistoryService(ISessionHistoryRepository sessionHistoryRepository, IResultRepository resultRepository, IUserAnswerRepository userAnswerRepository, IPartnerInvitationRepository partnerInvitationRepository, IMapper mapper)
+        public SessionHistoryService(ISessionHistoryRepository sessionHistoryRepository, IResultRepository resultRepository, IUserAnswerRepository userAnswerRepository, IPartnerInvitationRepository partnerInvitationRepository, IMapper mapper, ISentQuestionRepository sentQuestionRepository, IAuthRepository authRepository)
         {
             this.sessionHistoryRepository = sessionHistoryRepository;
             this.resultRepository = resultRepository;
             this.userAnswersRepository = userAnswerRepository;
             this.partnerInvitationRepository = partnerInvitationRepository;
             this.mapper = mapper;
+            this.sentQuestionRepository = sentQuestionRepository;
+            this.authRepository = authRepository;
         }
         public async Task<List<UnAttemptedSessionResponseDTO>> GetUnAttemptedSessionsForUser(Guid userId)
         {
@@ -46,108 +51,154 @@ namespace RepoCoupleQuiz.Services
 
             return unattemptedSessionDTOs;
         }
-        //public async Task<List<UserAnswerResultResponseDTO>> HandleUserAnswersAsync(Guid userId, Guid sessionId, UserAnswersRequestDTO request)
-        //{
-        //    var hasUserAttempted = await sessionHistoryRepository.HasUserAttemptedAsync(userId, sessionId);
-        //    if (hasUserAttempted)
-        //    {
-        //        throw new Exception("You have already attempted this session.");
-        //    }
+        public async Task<List<UserAnswerResultResponseDTO>> HandleSessionHistoryAnswer(SessionHistoryRequestDTO request)
+        {
+            var sessionDetails = await sessionHistoryRepository.GetSessionDetailsBySessionIdAsync(request.SessionId);
+            if(sessionDetails == null)
+            {
+                throw new Exception("Invalid SessionId or UserId");
+            }
+       
+            var userAnswer = new UserAnswers
+            {
+                UserId = request.UserAnswers.UserId,
+                QuestionId = request.UserAnswers.Answer.QuestionId,
+                AnswerForself = request.UserAnswers.Answer.AnswerForSelfOptionId,
+                AnswerForPartner = request.UserAnswers.Answer.AnswerForPartnerOptionId,
+                AnswerDate = DateTime.UtcNow,
+                PartnerInvitationId = request.UserAnswers.PartnerInvitationId,
+                Active = true,
+                CreatedAt = DateTime.UtcNow,
+            };
+            var newUserAnswer = await userAnswersRepository.Create(userAnswer);
+             sessionDetails.AttemptedDate = DateTime.UtcNow;
+            sessionDetails.IsAttempted = true;
+            sessionDetails.Active = false;
+            await sessionHistoryRepository.Update(sessionDetails);
+            var userAttempted = await userAnswersRepository.GetUserWhoAttemptedQuestion(newUserAnswer.GlobalId);
+            var partnerId = Guid.NewGuid();
+            if (userAttempted.PartnerInvitation.SenderUserId == request.UserAnswers.UserId)
+            {
+                partnerId = (Guid)userAttempted.PartnerInvitation.RecieverUserId;
+            }
+            else
+            {
+                partnerId = userAttempted.PartnerInvitation.SenderUserId;
+            }
+            var partnerAttemptedQuestion = await userAnswersRepository.CheckUserAnswerForQuestion(partnerId, request.UserAnswers.Answer.QuestionId, request.UserAnswers.PartnerInvitationId);
+            var partnerAnswers = new UserAnswers
+            {
+                UserId = partnerAttemptedQuestion.UserId,
+                QuestionId = partnerAttemptedQuestion.QuestionId,
+                PartnerInvitationId = partnerAttemptedQuestion.PartnerInvitationId,
+                AnswerForself = partnerAttemptedQuestion.AnswerForself,
+                AnswerForPartner = partnerAttemptedQuestion.AnswerForPartner,
+            };
+            var resultResponses = new List<UserAnswerResultResponseDTO>();
+            var userAnswers = new List<UserAnswers>();
+            userAnswers.Add(newUserAnswer);
+            userAnswers.Add(partnerAnswers);
+            foreach (var firstAnswer in userAnswers)
+            {
+                var result = new Result();
 
-        //    var session = await partnerInvitationRepository.GetByIdAsync(sessionId);
-        //    if (session == null || !session.IsCodeUsed)
-        //    {
-        //        throw new Exception("Invalid session or session code not used.");
-        //    }
+                foreach (var secondAnswer in userAnswers)
+                {
+                    result.UserId = firstAnswer.UserId;
+                    if (firstAnswer == secondAnswer) continue;
+                    result.PartnerUserId = secondAnswer.UserId;
+                    if (firstAnswer.AnswerForPartner == secondAnswer.AnswerForself)
+                    {
+                        result.IsAnswerCorrectAboutPartner = true;
+                        result.UserScore = 10;
 
-        //    // checkinh if already attempt by pratner
-        //    var partnerUserId = session.SenderUserId == userId ? session.RecieverUserId : session.SenderUserId;
-        //    var hasPartnerAttempted = await sessionHistoryRepository.HasUserAttemptedAsync((Guid)partnerUserId, sessionId);
+                        if (firstAnswer.AnswerForself == secondAnswer.AnswerForPartner)
+                        {
+                            result.PartnerScore = 10;
+                        }
+                        else
+                        {
+                            result.PartnerScore = 0;
+                        }
+                    }
+                    else
+                    {
+                        result.IsAnswerCorrectAboutPartner = false;
+                        result.UserScore = 0;
+                    }
 
-        //    // Add the user's answers and session history
-        //    var userAnswers = request.Answers.Select(answer => new UserAnswers
-        //    {
-        //        UserId = userId,
-        //        QuestionId = answer.QuestionId,
-        //        AnswerForself = answer.AnswerForSelfOptionId,
-        //        AnswerForPartner = answer.AnswerForPartnerOptionId,
-        //        AnswerDate = DateTime.UtcNow,
-        //        PartnerInvitationId = sessionId
-        //    }).ToList();
+                    if (firstAnswer.AnswerForself == secondAnswer.AnswerForPartner &&
+                        firstAnswer.AnswerForPartner == secondAnswer.AnswerForself)
+                    {
+                        result.UserScore = 10;
+                        result.PartnerScore = 10;
+                        result.IsAnswerCorrectAboutPartner = true;
+                        result.IsBothMatch = true;
+                        break;
+                    }
+                }
+                result.QuestionId = firstAnswer.QuestionId;
+                result.PartnerInvitationId = newUserAnswer.PartnerInvitationId;
 
-        //    foreach (var userAnswer in userAnswers)
-        //    {
-        //        await userAnswersRepository.Create(userAnswer);
-        //    }
+                var newResult = await resultRepository.Create(result);
+                var resultResponse = mapper.Map<UserAnswerResultResponseDTO>(newResult);
+                resultResponses.Add(resultResponse);
+            }
 
-        //    // Add the session history entry for the user
-        //    var sessionHistory = new SessionHistory
-        //    {
-        //        UserId = userId,
-        //        PartnerUserId = (Guid)partnerUserId,
-        //        QuestionId = userAnswers.First().QuestionId, 
-        //        PartnerInvitationId = sessionId,
-        //        IsAttempted = true,
-        //        Active = false,
-        //        AttemptedDate = DateTime.UtcNow
-        //    };
-        //    await sessionHistoryRepository.Update(sessionHistory);
 
-           
-        //    if (!hasPartnerAttempted)
-        //    {
-        //        var partnerSessionHistory = new SessionHistory
-        //        {
-        //            UserId = (Guid)partnerUserId,
-        //            PartnerUserId = userId,
-        //            QuestionId = userAnswers.First().QuestionId,
-        //            PartnerInvitationId = sessionId,
-        //            IsAttempted = false,
-        //            Active = true,
-        //            AttemptedDate = DateTime.UtcNow
-        //        };
-        //        await sessionHistoryRepository.Create(partnerSessionHistory);
-        //        throw new Exception("Your partner has not attempted the question yet.");
-        //    }
+            return resultResponses;
 
-        //    return await GenerateUserResults(userAnswers, userId, (Guid)partnerUserId, sessionId);
-        //}
+        }
+        public async Task AddQuestionToSessionHistory()
+        {
+            var allPartnerUsers = await partnerInvitationRepository.Get();
 
-        //private async Task<List<UserAnswerResultResponseDTO>> GenerateUserResults(
-        //    List<UserAnswers> userAnswers, Guid userId, Guid partnerUserId, Guid sessionId)
-        //{
-        //    var resultResponses = new List<UserAnswerResultResponseDTO>();
+            var yesterdayQuestion = await sentQuestionRepository.GetSentQuestionsByPreviousDateAsync();
 
-            
-        //    var partnerAnswers = await userAnswersRepository.GetUserAnswersAsync(partnerUserId, sessionId);
+            if (yesterdayQuestion == null)
+            {
+                return;
+            }
 
-        //    foreach (var userAnswer in userAnswers)
-        //    {
-        //        var correspondingPartnerAnswer = partnerAnswers.FirstOrDefault(pa => pa.QuestionId == userAnswer.QuestionId);
-        //        if (correspondingPartnerAnswer == null) continue;
+            var usersAttemptedQuestion = await userAnswersRepository.GetUsersWhoAttemptedTodayQuestion(yesterdayQuestion.QuestionId);
 
-        //        var result = new Result
-        //        {
-        //            UserId = userId,
-        //            PartnerUserId = partnerUserId,
-        //            QuestionId = userAnswer.QuestionId,
-        //            PartnerInvitationId = sessionId,
-        //            IsAnswerCorrectAboutPartner = userAnswer.AnswerForPartner == correspondingPartnerAnswer.AnswerForself,
-        //            UserScore = userAnswer.AnswerForPartner == correspondingPartnerAnswer.AnswerForself ? 10 : 0,
-        //            PartnerScore = correspondingPartnerAnswer.AnswerForPartner == userAnswer.AnswerForself ? 10 : 0,
-        //            IsBothMatch = userAnswer.AnswerForPartner == correspondingPartnerAnswer.AnswerForself
-        //                           && userAnswer.AnswerForself == correspondingPartnerAnswer.AnswerForPartner
-        //        };
+            var usersNotAttemptedQuestion = await authRepository.GetUsersWhoNotAttemptedTodayQuestion(usersAttemptedQuestion);
 
-        //        var newResult = await resultRepository.Create(result);
-        //        var resultResponse = mapper.Map<UserAnswerResultResponseDTO>(newResult);
-        //        resultResponses.Add(resultResponse);
-        //    }
+            foreach (var user in usersNotAttemptedQuestion)
+            {
+                var partnerInvitation = await GetPartnerInvitationDetails(allPartnerUsers, user.GlobalId);
 
-        //    return resultResponses;
-        //}
+                if (partnerInvitation == null)
+                {
+                    continue;
+                }
+
+                var sessionHistory = new SessionHistory
+                {
+                    UserId = user.GlobalId,
+                    PartnerUserId = partnerInvitation.SenderUserId == user.GlobalId ? partnerInvitation.RecieverUserId.Value : partnerInvitation.SenderUserId,
+                    PartnerInvitationId = partnerInvitation.GlobalId,
+                    QuestionId = yesterdayQuestion.QuestionId,
+                 //   AttemptedDate = DateTime.Now,
+                    IsAttempted = false
+                };
+
+                await sessionHistoryRepository.Create(sessionHistory);
+            }
+
+        }
+
+        private async Task<PartnerInvitation> GetPartnerInvitationDetails(List<PartnerInvitation> partnerInvitations, Guid userId)
+        {
+            var partnerInvitation = partnerInvitations
+                .FirstOrDefault(pi => pi.SenderUserId == userId || pi.RecieverUserId == userId);
+
+            return partnerInvitation;
+        }
 
     }
 
 }
+
+
 

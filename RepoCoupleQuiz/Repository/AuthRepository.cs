@@ -69,7 +69,29 @@ namespace RepoCoupleQuiz.Repository
                                  .FirstOrDefaultAsync(us => us.Email == request.Email && us.Password == request.Password);
         }
 
+        public async Task<List<User>> GetUsersWhoNotAttemptedTodayQuestion(List<UserAnswers> userAnswers)
+        {
+            List<Guid> userIds = userAnswers.Select(us => us.GlobalId).ToList();
 
+            var allUsers = await _context.User.ToListAsync();
+
+            var filteredUsers = allUsers.Where(us => !userIds.Contains(us.GlobalId)).ToList();
+
+            var partnerInvitations = await _context.PartnerInvitation.ToListAsync();
+
+            var partnerUserIds = partnerInvitations
+                .SelectMany(pi => new List<Guid?> { pi.SenderUserId, pi.RecieverUserId })
+                .Where(id => id.HasValue) 
+                .Select(id => id.Value)   
+                .Distinct()               
+                .ToList();
+
+            var usersInPartnerInvitations = filteredUsers
+                .Where(us => partnerUserIds.Contains(us.GlobalId))
+                .ToList();
+
+            return usersInPartnerInvitations;
+        }
     }
 
 }

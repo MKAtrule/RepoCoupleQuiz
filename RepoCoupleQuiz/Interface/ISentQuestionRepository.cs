@@ -7,6 +7,7 @@ namespace RepoCoupleQuiz.Interface
         Task MarkAsSentAsync(Guid questionId,DateTime date);
         Task<List<Guid>> GetSentQuestionIdsAsync();
         Task<List<SentQuestion>> GetSentQuestionsByDateAsync(DateTime date);
+        Task<SentQuestion> GetSentQuestionsByPreviousDateAsync();
 
     }
 }

@@ -38,5 +38,12 @@ namespace RepoCoupleQuiz.Repository
                                  .ToListAsync();
         }
 
+        public async Task<SentQuestion> GetSentQuestionsByPreviousDateAsync()
+        {
+            var yesterday= DateTime.Today.AddDays(-1);
+            yesterday = yesterday.Date;
+            return await _context.SentQuestion
+                                 .FirstOrDefaultAsync(sq => sq.SentDate.Date == yesterday);
+        }
     }
 }

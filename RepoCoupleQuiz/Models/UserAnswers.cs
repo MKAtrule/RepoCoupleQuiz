@@ -22,7 +22,6 @@ namespace RepoCoupleQuiz.Models
         [ForeignKey("PartnerInvitation")]
         public Guid PartnerInvitationId { get; set; }
         public PartnerInvitation PartnerInvitation { get; set; }
-
         public DateTime AnswerDate { get; set; }
     }
 

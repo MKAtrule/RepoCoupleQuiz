@@ -1,9 +1,11 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using RepoCoupleQuiz.DTO.RequestDTO;
 using RepoCoupleQuiz.Services;
 
 namespace RepoCoupleQuiz.Controllers
 {
+ //    [Authorize]
     public class SessionHistoryController : BaseController
     {
         private readonly SessionHistoryService sessionHistoryService;
@@ -11,7 +13,7 @@ namespace RepoCoupleQuiz.Controllers
         {
             this.sessionHistoryService = sessionHistoryService;
         }
-        [Authorize]
+      
         [HttpGet("GetSessionHistory")]
         public async Task<IActionResult> GetUnAttemptedQuestionForUsers(Guid id)
         {
@@ -22,7 +24,26 @@ namespace RepoCoupleQuiz.Controllers
                 {
                     success = true,
                     data = await sessionHistoryService.GetUnAttemptedSessionsForUser(id),
-                    Message = "Question Listed Success"
+                    Message = "Session History Listed Success"
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Messsage = ex.Message });
+            }
+        }
+      
+        [HttpPost("HandleUnAttemptedQuiz")]
+        public async Task<IActionResult> HandleUnAttemptedSessionQuiz([FromBody]SessionHistoryRequestDTO request)
+        {
+            try
+            {
+
+                return new JsonResult(new
+                {
+                    success = true,
+                    data = await sessionHistoryService.HandleSessionHistoryAnswer(request),
+                    Message = "Result Listed Success"
                 });
             }
             catch (Exception ex)
