@@ -25,6 +25,7 @@ namespace RepoCoupleQuiz.Services
                     InvitationCode = Guid.NewGuid(),
                     IsCodeUsed = false,
                     IsAccepted = false,
+                    Active = true,
                 };
                 var newPartnerInvitation = await partnerInvitationRepository.Create(partnerInvitation);
                 return new GenerateCodeResponseDTO
@@ -47,6 +48,10 @@ namespace RepoCoupleQuiz.Services
                 if (isValid)
                 {
                     var sessionDetails = await partnerInvitationRepository.GetInvitationDetails(request.Code);
+                    if(sessionDetails.SenderUserId== request.UserId)
+                    {
+                        throw new Exception("you can not pair yourself");
+                    }
                     sessionDetails.RecieverUserId = request.UserId;
                     sessionDetails.IsCodeUsed = true;
                     sessionDetails.CodeExpires = DateTime.UtcNow;
@@ -73,5 +78,35 @@ namespace RepoCoupleQuiz.Services
             }
 
         }
+        public async Task<List<PartnerInvitationResponseDTO>> GetAllSessionsAsync()
+        {
+            var allUsersSession = await partnerInvitationRepository.GetAll();
+            if (allUsersSession.Count==0)
+            {
+                throw new Exception("No any User Session ");
+            }
+            var response= new List<PartnerInvitationResponseDTO>();
+            foreach (var user in allUsersSession)
+            {
+                if(user.RecieverUser == null)
+                {
+                    continue;
+                }
+                response.Add(new PartnerInvitationResponseDTO
+                {
+                    PartnerInvitationId = user.GlobalId,
+                    SenderId=user.SenderUserId,
+                    SenderName = user.SenderUser.Name,
+                    SenderImage=user.SenderUser.ProfileImage,
+                    RecieverId=user.RecieverUserId,
+                    RecieverName=user.RecieverUser.Name,
+                    RecieverImage=user.RecieverUser.ProfileImage,
+                });
+
+            }
+            return response;
+        }
+       
+
     }
 }

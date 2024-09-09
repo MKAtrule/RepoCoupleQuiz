@@ -11,7 +11,6 @@ namespace RepoCoupleQuiz.Models
         [ForeignKey("RecieverUser")]
         public Guid? RecieverUserId { get; set; }
         public User RecieverUser { get; set; }
-
         public Guid InvitationCode { get; set; }
         public bool IsAccepted { get; set; }
         public bool IsCodeUsed { get; set; }

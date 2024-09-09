@@ -162,6 +162,28 @@ namespace RepoCoupleQuiz.Services
 
             return response;
         }
+        public async Task<List<QuestionResponseDTO>> GetAllAsync()
+        {
+            var allQuestion= await questionRepository.GetAll();
+            var response = new List<QuestionResponseDTO>();
+            foreach (var question in allQuestion)
+            {
+                response.Add(new QuestionResponseDTO
+                {
+                    QuestionId = question.GlobalId,
+                    Text = question.QuestionText,
+                    Options = question.QuestionOption.Select(op => new OptionRequestDTO
+                    {
+                        OptionId = op.GlobalId,
+                        Text = op.OptionText
+                    }
+                    ).ToList(),
+                });
+            }
+            return response;
+            
+         
+        }
 
 
     }

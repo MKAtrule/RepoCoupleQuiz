@@ -110,6 +110,54 @@ namespace RepoCoupleQuiz.Services
 
 
         }
+        public async Task<UserPersonalInfoResponeDTO> GetPersonalInfoAsync(Guid id)
+        {
+            var user = await authRepository.GetByIdAsync(id);
+            if (user is null)
+            {
+                throw new Exception("Khan shb nhi mily");
+            }
+            return new UserPersonalInfoResponeDTO
+            {
+                UserName = user.Name,
+                Email = user.Email,
+                Gender = user.Gender,
+                Age = user.Age,
+                UserId = user.GlobalId,
+                Image = user
+                .ProfileImage,
+            };
+
+
+        }
+        public async Task<UserPersonalInfoResponeDTO> UpdateAsync(UpdateUserRequestDTO request)
+        {
+            var userExist = await authRepository.GetByIdAsync(request.UserId);
+            if (userExist is null)
+            {
+                throw new Exception("user kaine");
+            }
+            if (request.Image != null && request.Image.Length > 0)
+            {
+                var imagepath = await uploadRepo.UploadImageAsync(request.Image);
+                userExist.Name = request.UserName;
+                userExist.Age = request.Age;
+                userExist.Gender = request.Gender;
+                userExist.ProfileImage = imagepath;
+            }
+            var newUser = await authRepository.Update(userExist);
+            return new UserPersonalInfoResponeDTO
+            {
+                UserName = newUser.Name,
+                Image = newUser.ProfileImage,
+                Age = newUser.Age,
+                Gender = newUser.Gender,
+                UserId = newUser.GlobalId,
+                Email = newUser.Email,
+            };
+
+
+        }
         private async Task<string> GenerateToken(User user, List<string> roles)
         {
             var claims = new List<Claim>();
@@ -127,7 +175,7 @@ namespace RepoCoupleQuiz.Services
                 issuer: config["JWT:Issuer"],
                 audience: config["JWT:Audience"],
                 claims: claims,
-                expires: DateTime.Now.AddMinutes(20),
+                expires: DateTime.Now.AddDays(1),
                 signingCredentials: credentials);
 
             var tokenHandler = new JwtSecurityTokenHandler();

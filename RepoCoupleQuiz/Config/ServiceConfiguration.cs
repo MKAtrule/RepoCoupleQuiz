@@ -31,6 +31,7 @@ namespace RepoCoupleQuiz.Config
             services.AddScoped<IResultRepository, ResultRepository>();
             services.AddScoped<UserAnswersService>();
             services.AddScoped<SessionHistoryService>();
+            services.AddScoped<ResultService>();
         }
     }
 }

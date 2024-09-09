@@ -13,15 +13,16 @@ namespace RepoCoupleQuiz.Repository
             _context = context;
         }
 
-        public Task<bool> CodeValidation(Guid code)
+        public async Task<bool> CodeValidation(Guid code)
         {
-            var IsValid = _context.PartnerInvitation
+            var IsValid =await _context.PartnerInvitation
                                   .FirstOrDefaultAsync(pi=>pi.InvitationCode==code && pi.IsCodeUsed==false);
-            if(IsValid != null) 
-                return Task.FromResult(true);
-            
+            if (IsValid != null)
+                return true;
+
             else
-                return Task.FromResult(false);        
+                return false;
+         
         }
         public async Task<PartnerInvitation> GetInvitationDetails(Guid code)
         {
@@ -38,5 +39,14 @@ namespace RepoCoupleQuiz.Repository
                                  .FirstOrDefaultAsync(pi=>pi.GlobalId==id);
                 
         }
+        public async Task<List<PartnerInvitation>> GetAll()
+        {
+            return await _context.PartnerInvitation
+                                  .Include(su => su.SenderUser)
+                                  .Include (ru => ru.RecieverUser)
+                                  .Where(pi=>pi.Active)
+                                  .ToListAsync();
+        }
+        
     }
 }

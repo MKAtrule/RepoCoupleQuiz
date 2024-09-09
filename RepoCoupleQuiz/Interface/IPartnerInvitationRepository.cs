@@ -6,6 +6,7 @@ namespace RepoCoupleQuiz.Interface
     {
         Task<bool> CodeValidation(Guid code);
         Task<PartnerInvitation> GetInvitationDetails(Guid code);
-        Task<PartnerInvitation> GetByIdAsync(Guid id);  
+        Task<PartnerInvitation> GetByIdAsync(Guid id);
+        Task<List<PartnerInvitation>> GetAll();
     }
 }

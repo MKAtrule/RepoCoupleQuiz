@@ -5,7 +5,7 @@ using RepoCoupleQuiz.Services;
 
 namespace RepoCoupleQuiz.Controllers
 {
- //    [Authorize]
+    [Authorize]
     public class SessionHistoryController : BaseController
     {
         private readonly SessionHistoryService sessionHistoryService;
@@ -13,7 +13,7 @@ namespace RepoCoupleQuiz.Controllers
         {
             this.sessionHistoryService = sessionHistoryService;
         }
-      
+              
         [HttpGet("GetSessionHistory")]
         public async Task<IActionResult> GetUnAttemptedQuestionForUsers(Guid id)
         {
@@ -32,9 +32,9 @@ namespace RepoCoupleQuiz.Controllers
                 return BadRequest(new { Messsage = ex.Message });
             }
         }
-      
+        
         [HttpPost("HandleUnAttemptedQuiz")]
-        public async Task<IActionResult> HandleUnAttemptedSessionQuiz([FromBody]SessionHistoryRequestDTO request)
+        public async Task<IActionResult> HandleUnAttemptedSessionQuiz([FromBody] SessionHistoryRequestDTO request)
         {
             try
             {
@@ -51,5 +51,7 @@ namespace RepoCoupleQuiz.Controllers
                 return BadRequest(new { Messsage = ex.Message });
             }
         }
+         
+    
     }
 }

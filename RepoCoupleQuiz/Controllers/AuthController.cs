@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using RepoCoupleQuiz.DTO.RequestDTO;
 using RepoCoupleQuiz.Services;
 
@@ -131,25 +132,69 @@ namespace RepoCoupleQuiz.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
-        //[HttpPost("ResetPassword")]
-        //public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequestDTO request)
-        //{
-        //    try
-        //    {
-        //        return new JsonResult
-        //            (
-        //            new
-        //            {
-        //                success = true,
-        //                data = await _authService.ResetPasswordAsync(request),
-        //                Message = "Password Reset SuccessFully",
-        //            });
-        //    }
+        [Authorize]
+        [HttpGet("UserPersonalInfo")]
+        public async Task<IActionResult> GetPersonalInfo(Guid id)
+        {
+            try
+            {
+                return new JsonResult
+                    (
+                    new
+                    {
+                        success = true,
+                        data = await _authService.GetPersonalInfoAsync(id),
+                        Message = "User info Listed Sucess",
+                    });
+            }
 
-        //    catch (Exception ex)
-        //    {
-        //        return new JsonResult(new { error = ex.Message });
-        //    }
-        //}
+            catch (Exception ex)
+            {
+                return new JsonResult(new { error = ex.Message });
+            }
+        }
+        [Authorize]
+        [HttpPost("ResetPassword")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequestDTO request)
+        {
+            try
+            {
+                return new JsonResult
+                    (
+                    new
+                    {
+                        success = true,
+                        data = await _authService.ResetPasswordAsync(request),
+                        Message = "Password Reset SuccessFully",
+                    });
+            }
+
+            catch (Exception ex)
+            {
+                return new JsonResult(new { error = ex.Message });
+            }
+        }
+        [Authorize]
+        [HttpPut("UpdateUser")]
+        public async Task<IActionResult> UpdtateUserInfo([FromForm] UpdateUserRequestDTO request)
+        {
+            try
+            {
+                return new JsonResult
+                    (
+                    new
+                    {
+                        success = true,
+                        data = await _authService.UpdateAsync(request),
+                        Message = "User info Listed Sucess",
+                    });
+            }
+
+            catch (Exception ex)
+            {
+                return new JsonResult(new { error = ex.Message });
+            }
+        }
+
     }
 }

@@ -30,7 +30,8 @@ namespace RepoCoupleQuiz.Repository
         }
         public async Task<User> GetUserByRefreshTokenAsync(string refreshToken)
         {
-            return await _context.User.FirstOrDefaultAsync(u => u.RefreshToken == refreshToken);
+            return await _context.User
+                                .FirstOrDefaultAsync(u => u.RefreshToken == refreshToken);
         }
         public async Task SaveResetPasswordOtpAsync(User user, string otp)
         {
@@ -41,11 +42,13 @@ namespace RepoCoupleQuiz.Repository
         }
         public async Task<User> GetUserByOtpAsync(string email, string otp)
         {
-            return await _context.User.FirstOrDefaultAsync(u => u.Email == email && u.ResetPasswordOtp == otp && u.ResetPasswordOtpExpiryTime > DateTime.UtcNow);
+            return await _context.User
+                                 .FirstOrDefaultAsync(u => u.Email == email && u.ResetPasswordOtp == otp && u.ResetPasswordOtpExpiryTime > DateTime.UtcNow);
         }
         public async Task<User> FindByEmailAsync(string email)
         {
-            return await _context.User.FirstOrDefaultAsync(us => us.Email == email);
+            return await _context.User
+                                .FirstOrDefaultAsync(us => us.Email == email);
         }
         public async Task<User> UpdatePassword(string email, string password)
         {
@@ -75,7 +78,9 @@ namespace RepoCoupleQuiz.Repository
 
             var allUsers = await _context.User.ToListAsync();
 
-            var filteredUsers = allUsers.Where(us => !userIds.Contains(us.GlobalId)).ToList();
+            var filteredUsers = allUsers
+                                       .Where(us => !userIds.Contains(us.GlobalId))
+                                       .ToList();
 
             var partnerInvitations = await _context.PartnerInvitation.ToListAsync();
 
@@ -91,6 +96,20 @@ namespace RepoCoupleQuiz.Repository
                 .ToList();
 
             return usersInPartnerInvitations;
+        }
+
+        public async Task<List<User>> GetUsersByIds(List<Guid> users)
+        {
+             List<User> user= new List<User>();
+            foreach (var item in users)
+            {
+                var userData = await _context.User.FirstOrDefaultAsync(us=>us.GlobalId==item);
+                if(userData != null)
+                {
+                    user.Add(userData);
+                }
+            }
+            return user;
         }
     }
 

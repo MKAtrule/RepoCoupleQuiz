@@ -31,9 +31,9 @@ namespace RepoCoupleQuiz.Services
         {
             var unattemptedSessions = await sessionHistoryRepository.GetSessionHistoryByIdAsync(userId);
 
-            var unattemptedSessionDTOs = unattemptedSessions.Select(sh => new UnAttemptedSessionResponseDTO
+            var unattemptedSession = unattemptedSessions.Select(sh => new UnAttemptedSessionResponseDTO
             {
-                SessionId = sh.PartnerInvitationId,
+                SessionId = sh.GlobalId,
                 UnAttemptedQuestionDTOs = new List<UnAttemptedQuestionDTO>
                 {
                       new UnAttemptedQuestionDTO
@@ -49,7 +49,7 @@ namespace RepoCoupleQuiz.Services
                 }
             }).ToList();
 
-            return unattemptedSessionDTOs;
+            return unattemptedSession;
         }
         public async Task<List<UserAnswerResultResponseDTO>> HandleSessionHistoryAnswer(SessionHistoryRequestDTO request)
         {
@@ -86,6 +86,10 @@ namespace RepoCoupleQuiz.Services
                 partnerId = userAttempted.PartnerInvitation.SenderUserId;
             }
             var partnerAttemptedQuestion = await userAnswersRepository.CheckUserAnswerForQuestion(partnerId, request.UserAnswers.Answer.QuestionId, request.UserAnswers.PartnerInvitationId);
+            if (partnerAttemptedQuestion is null)
+            {
+                throw new Exception("Your Partner has not attempted yet");
+            }
             var partnerAnswers = new UserAnswers
             {
                 UserId = partnerAttemptedQuestion.UserId,
@@ -179,7 +183,6 @@ namespace RepoCoupleQuiz.Services
                     PartnerUserId = partnerInvitation.SenderUserId == user.GlobalId ? partnerInvitation.RecieverUserId.Value : partnerInvitation.SenderUserId,
                     PartnerInvitationId = partnerInvitation.GlobalId,
                     QuestionId = yesterdayQuestion.QuestionId,
-                 //   AttemptedDate = DateTime.Now,
                     IsAttempted = false
                 };
 
@@ -193,7 +196,7 @@ namespace RepoCoupleQuiz.Services
             var partnerInvitation = partnerInvitations
                 .FirstOrDefault(pi => pi.SenderUserId == userId || pi.RecieverUserId == userId);
 
-            return partnerInvitation;
+            return await Task.FromResult(partnerInvitation);
         }
 
     }

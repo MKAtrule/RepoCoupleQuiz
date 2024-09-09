@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using RepoCoupleQuiz.Config;
+using RepoCoupleQuiz.Controllers;
 using RepoCoupleQuiz.Data;
 using RepoCoupleQuiz.Services;
 using System.Security.Claims;
@@ -65,10 +66,14 @@ app.UseAuthorization();
 app.UseHangfireDashboard();  
 app.UseHangfireServer();    
 var recurringJobs = app.Services.GetRequiredService<IRecurringJobManager>();
-recurringJobs.AddOrUpdate<QuestionService>(
+recurringJobs.AddOrUpdate<QuestionController>(
     "Send Daily Question",
-    service => service.SendDailyQuestionAsync(),
+    service => service.SendDailyQuestion(),
     Cron.DayInterval(1));
+recurringJobs.AddOrUpdate<SessionHistoryService>(
+    "Add SessionHistory into User",
+    service=>service.AddQuestionToSessionHistory(),
+   Cron.DayInterval(1) );
 app.MapControllers();
 
 app.Run();

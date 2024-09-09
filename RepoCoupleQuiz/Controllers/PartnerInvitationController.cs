@@ -12,7 +12,7 @@ namespace RepoCoupleQuiz.Controllers
         {
             this.partnerInvitationService = partnerInvitationService;
         }
-        [Authorize(Roles ="User")]
+        [Authorize]
         [HttpPost("GenerateCode")]
         public async Task<IActionResult> GenerateCode([FromBody] GenerateCodeRequestDTO request)
         {
@@ -31,7 +31,7 @@ namespace RepoCoupleQuiz.Controllers
                 return BadRequest(new { Messsage = ex.Message });
             }
         }
-        [Authorize(Roles ="User")]
+        [Authorize]
         [HttpPost("PartnerJoining")]
         public async Task<IActionResult> PartnerJoin([FromBody] PartnerInvitationJoiningRequestDTO request)
         {
@@ -50,7 +50,29 @@ namespace RepoCoupleQuiz.Controllers
                 return BadRequest(new { Messsage = ex.Message });
             }
         }
+        [Authorize(Roles ="Admin")]
+        [HttpGet("GetAllSessions")]
+        public async Task<IActionResult> GetAllSession()
+        {
+            try
+            {
+
+                return new JsonResult(new
+                {
+                    success = true,
+                    data = await partnerInvitationService.GetAllSessionsAsync(),
+                    Message = "All Session Listed SuccessFully"
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Messsage = ex.Message });
+            }
+        }
+        
+
+
     }
-   
+
 }
 

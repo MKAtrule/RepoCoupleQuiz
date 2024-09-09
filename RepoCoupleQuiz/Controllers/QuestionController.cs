@@ -88,6 +88,25 @@ namespace RepoCoupleQuiz.Controllers
                 return BadRequest(new { Messsage = ex.Message });
             }
         }
+        [Authorize(Roles ="Admin")]
+        [HttpGet("GetAllQuestions")]
+        public async Task<IActionResult> GetAll()
+        {
+            try
+            {
+
+                return new JsonResult(new
+                {
+                    success = true,
+                    data = await questionService.GetAllAsync(),
+                    Message = "Question Send Success"
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Messsage = ex.Message });
+            }
+        }
 
     }
 }
